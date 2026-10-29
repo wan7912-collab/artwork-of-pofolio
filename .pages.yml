@@ -1,0 +1,135 @@
+# Pages CMS 後台設定（https://pagescms.org）
+media:
+  input: src/assets/uploads
+  output: /src/assets/uploads
+  extensions: [jpg, jpeg, png, webp]
+
+content:
+  - name: artworks
+    label: 作品
+    type: collection
+    path: src/content/artworks
+    # 中文標題轉不成網址，所以檔名（也就是作品網址）用建立時間
+    filename: "{year}{month}{day}-{hour}{minute}{second}.md"
+    view:
+      primary: title_zh
+      fields: [title_zh, year, series]
+    fields:
+      - name: title_zh
+        label: 標題（中文）
+        type: string
+        required: true
+      - name: title_en
+        label: 標題（英文，選填）
+        type: string
+      - name: year
+        label: 年份
+        type: number
+        required: true
+      - name: series
+        label: 系列
+        type: reference
+        options:
+          collection: series
+          search: title_zh
+          label: "{title_zh}"
+      - name: medium_zh
+        label: 媒材（中文），例如「油彩、畫布」
+        type: string
+      - name: medium_en
+        label: 媒材（英文，選填），例如 Oil on canvas
+        type: string
+      - name: size
+        label: 尺寸，例如 60 × 45 cm
+        type: string
+      - name: images
+        label: 圖片（第一張為主圖，可拖曳排序）
+        type: image
+        required: true
+        list: true
+      - name: description_zh
+        label: 作品說明（中文，選填）
+        type: text
+      - name: description_en
+        label: 作品說明（英文，選填）
+        type: text
+
+  - name: series
+    label: 系列
+    type: collection
+    path: src/content/series
+    filename: "series-{year}{month}{day}-{hour}{minute}{second}.md"
+    view:
+      primary: title_zh
+      fields: [title_zh, order]
+    fields:
+      - name: title_zh
+        label: 系列名稱（中文）
+        type: string
+        required: true
+      - name: title_en
+        label: 系列名稱（英文，選填）
+        type: string
+      - name: description_zh
+        label: 系列說明（中文，選填）
+        type: text
+      - name: description_en
+        label: 系列說明（英文，選填）
+        type: text
+      - name: order
+        label: 排序（數字越小越前面）
+        type: number
+        default: 99
+
+  - name: about
+    label: 關於我
+    type: file
+    path: src/data/about.json
+    format: json
+    fields:
+      - name: photo
+        label: 個人照
+        type: image
+      - name: bio_zh
+        label: 簡介（中文）
+        type: text
+      - name: bio_en
+        label: 簡介（英文，選填）
+        type: text
+      - name: exhibitions
+        label: 展歷
+        type: object
+        list: true
+        fields:
+          - { name: year, label: 年份, type: string }
+          - { name: text_zh, label: 內容（中文）, type: string }
+          - { name: text_en, label: 內容（英文，選填）, type: string }
+      - name: education
+        label: 學歷
+        type: object
+        list: true
+        fields:
+          - { name: year, label: 年份, type: string }
+          - { name: text_zh, label: 內容（中文）, type: string }
+          - { name: text_en, label: 內容（英文，選填）, type: string }
+
+  - name: settings
+    label: 網站設定
+    type: file
+    path: src/data/settings.json
+    format: json
+    fields:
+      - { name: site_name_zh, label: 網站名稱（中文）, type: string, required: true }
+      - { name: site_name_en, label: 網站名稱（英文）, type: string }
+      - { name: description_zh, label: 網站簡述（中文，給搜尋引擎看）, type: string }
+      - { name: description_en, label: 網站簡述（英文）, type: string }
+      - { name: email, label: Email, type: string }
+      - { name: contact_intro_zh, label: 聯絡頁說明（中文）, type: text }
+      - { name: contact_intro_en, label: 聯絡頁說明（英文，選填）, type: text }
+      - name: socials
+        label: 社群連結
+        type: object
+        list: true
+        fields:
+          - { name: label, label: 名稱（例如 Instagram）, type: string }
+          - { name: url, label: 網址, type: string }
