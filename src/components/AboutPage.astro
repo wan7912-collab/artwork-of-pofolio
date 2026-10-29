@@ -1,0 +1,108 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import about from '../data/about.json';
+import { img } from '../lib/images';
+import { pick, ui, type Lang } from '../lib/i18n';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = ui[lang];
+
+type Entry = { year?: string | number | null; text_zh?: string | null; text_en?: string | null };
+const lists: { title: string; items: Entry[] }[] = [
+  { title: t.exhibitions, items: (about.exhibitions ?? []) as Entry[] },
+  { title: t.education, items: (about.education ?? []) as Entry[] },
+].filter((l) => l.items.length > 0);
+const bio = pick(lang, about.bio_zh, about.bio_en);
+---
+
+<Base lang={lang} title={t.about} path="/about/" current="about">
+  <div class="about">
+    {
+      about.photo && (
+        <div class="photo">
+          <Image src={img(about.photo)} alt="" widths={[400, 800]} sizes="(max-width: 800px) 100vw, 360px" />
+        </div>
+      )
+    }
+    <div class="text">
+      <h1 class="page-title">{t.about}</h1>
+      {bio && <p class="bio">{bio}</p>}
+
+      {
+        lists.map((list) => (
+          <section>
+            <h2>{list.title}</h2>
+            <ul>
+              {list.items.map((it) => (
+                <li>
+                  <span class="year">{it.year}</span>
+                  <span>{pick(lang, it.text_zh, it.text_en)}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</Base>
+
+<style>
+  .about {
+    display: grid;
+    grid-template-columns: 360px minmax(0, 1fr);
+    gap: 64px;
+    align-items: start;
+    max-width: 1100px;
+    padding-top: 24px;
+  }
+  @media (max-width: 800px) {
+    .about {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .photo {
+      max-width: 360px;
+    }
+  }
+  .photo :global(img) {
+    width: 100%;
+    background: var(--surface);
+  }
+  .page-title {
+    margin-top: 0;
+  }
+  .bio {
+    white-space: pre-line;
+    max-width: 640px;
+    margin: 0 0 48px;
+  }
+  section + section {
+    margin-top: 40px;
+  }
+  h2 {
+    font-size: 1.4rem;
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    display: grid;
+    grid-template-columns: 4.5em minmax(0, 1fr);
+    gap: 16px;
+    padding: 6px 0;
+  }
+  .year {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

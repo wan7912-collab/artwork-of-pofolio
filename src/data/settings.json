@@ -1,0 +1,13 @@
+{
+  "site_name_zh": "藝術家姓名",
+  "site_name_en": "Artist Name",
+  "description_zh": "藝術家姓名的繪畫作品集。",
+  "description_en": "Paintings by Artist Name.",
+  "email": "hello@example.com",
+  "contact_intro_zh": "歡迎來信洽詢作品、展覽或合作。",
+  "contact_intro_en": "For enquiries about works, exhibitions or collaborations, please get in touch.",
+  "socials": [
+    { "label": "Instagram", "url": "https://www.instagram.com/" },
+    { "label": "Facebook", "url": "https://www.facebook.com/" }
+  ]
+}

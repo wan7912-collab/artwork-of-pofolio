@@ -1,0 +1,14 @@
+{
+  "photo": "/src/assets/uploads/portrait.jpg",
+  "bio_zh": "（範例簡介，請在後台替換）\n生於台灣，現居台北。以油彩與水彩描繪海岸、室內與城市的光線，關注日常場景中稍縱即逝的時刻。",
+  "bio_en": "(Sample bio — replace it in the editor.)\nBorn in Taiwan and based in Taipei, working in oil and watercolour on the light of coastlines, interiors and the city at night.",
+  "exhibitions": [
+    { "year": "2025", "text_zh": "個展「退潮之後」，範例藝廊，台北", "text_en": "After the Tide (solo), Sample Gallery, Taipei" },
+    { "year": "2024", "text_zh": "聯展「室內光」，範例藝術空間，台中", "text_en": "Interior Light (group), Sample Art Space, Taichung" },
+    { "year": "2023", "text_zh": "新人獎入選，範例美術館", "text_en": "Emerging Artist Award shortlist, Sample Museum" }
+  ],
+  "education": [
+    { "year": "2022", "text_zh": "範例大學 美術系 碩士", "text_en": "MFA, Department of Fine Arts, Sample University" },
+    { "year": "2019", "text_zh": "範例大學 美術系 學士", "text_en": "BFA, Department of Fine Arts, Sample University" }
+  ]
+}

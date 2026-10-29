@@ -1,0 +1,13 @@
+---
+import ArtworkPage from '../../components/ArtworkPage.astro';
+import { getArtworks } from '../../lib/data';
+
+export async function getStaticPaths() {
+  const works = await getArtworks();
+  return works.map((work) => ({ params: { slug: work.id }, props: { work } }));
+}
+
+const { work } = Astro.props;
+---
+
+<ArtworkPage lang="zh" work={work} />

@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import { ui } from '../lib/i18n';
+import { langUrl } from '../lib/url';
+---
+
+<Base lang="zh" title={ui.zh.notFound} path="/">
+  <div class="nf">
+    <h1 class="page-title">{ui.zh.notFound}<br /><small>{ui.en.notFound}</small></h1>
+    <p>
+      <a href={langUrl('zh', '/')}>{ui.zh.home}</a> · <a href={langUrl('en', '/')}>{ui.en.home}</a>
+    </p>
+  </div>
+</Base>
+
+<style>
+  .nf {
+    padding: 48px 0;
+  }
+  small {
+    font-size: 0.55em;
+    color: var(--muted);
+  }
+</style>

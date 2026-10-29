@@ -1,0 +1,184 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { getGroups, type Artwork } from '../lib/data';
+import { img } from '../lib/images';
+import { pick, ui, type Lang } from '../lib/i18n';
+import { langUrl } from '../lib/url';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = ui[lang];
+const { groups, rest } = await getGroups();
+
+const sections: { id: string; title: string; description: string; works: Artwork[] }[] = groups.map((g) => ({
+  id: g.id,
+  title: pick(lang, g.series.data.title_zh, g.series.data.title_en),
+  description: pick(lang, g.series.data.description_zh, g.series.data.description_en),
+  works: g.works,
+}));
+if (rest.length) sections.push({ id: 'other', title: t.other, description: '', works: rest });
+const showFilter = sections.length > 1;
+---
+
+<Base lang={lang} path="/" current="works">
+  {
+    showFilter && (
+      <div class="filter" role="group" aria-label={t.filter}>
+        <button type="button" data-filter="" aria-pressed="true">
+          {t.all}
+        </button>
+        {sections.map((s) => (
+          <button type="button" data-filter={s.id} aria-pressed="false">
+            {s.title}
+          </button>
+        ))}
+      </div>
+    )
+  }
+
+  {sections.length === 0 && <p class="empty">{t.empty}</p>}
+
+  {
+    sections.map((s) => (
+      <section class="series" data-series={s.id} id={`series-${s.id}`}>
+        <header class="series-head">
+          <h2>{s.title}</h2>
+          {s.description && <p>{s.description}</p>}
+        </header>
+        <ul class="masonry">
+          {s.works.map((w) => {
+            const title = pick(lang, w.data.title_zh, w.data.title_en);
+            return (
+              <li>
+                <a href={langUrl(lang, `/works/${w.id}/`)}>
+                  <Image
+                    src={img(w.data.images[0])}
+                    alt={title}
+                    widths={[480, 960]}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"
+                    loading="lazy"
+                  />
+                  <span class="caption">
+                    <span class="title">{title}</span>
+                    <span class="year">{w.data.year}</span>
+                  </span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    ))
+  }
+</Base>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.filter button');
+  const sections = document.querySelectorAll<HTMLElement>('.series');
+
+  function apply(id: string) {
+    const valid = [...sections].some((s) => s.dataset.series === id);
+    const target = valid ? id : '';
+    sections.forEach((s) => (s.hidden = target !== '' && s.dataset.series !== target));
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === target)));
+  }
+
+  buttons.forEach((b) =>
+    b.addEventListener('click', () => {
+      const id = b.dataset.filter ?? '';
+      history.replaceState(null, '', id ? `#${id}` : location.pathname);
+      apply(id);
+    }),
+  );
+  apply(decodeURIComponent(location.hash.slice(1)));
+</script>
+
+<style>
+  .filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin: 8px 0 40px;
+  }
+  .filter button {
+    background: none;
+    border: 0;
+    padding: 4px 0;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+  }
+  .filter button:hover {
+    color: var(--fg);
+  }
+  .filter button[aria-pressed='true'] {
+    color: var(--fg);
+    border-bottom-color: var(--fg);
+  }
+  .series + .series {
+    margin-top: 72px;
+  }
+  .series-head {
+    max-width: 640px;
+    margin-bottom: 24px;
+  }
+  .series-head h2 {
+    font-size: 1.75rem;
+    margin: 0 0 4px;
+  }
+  .series-head p {
+    margin: 0;
+    color: var(--muted);
+  }
+  .masonry {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    column-count: 3;
+    column-gap: 28px;
+  }
+  @media (max-width: 1100px) {
+    .masonry {
+      column-count: 2;
+    }
+  }
+  @media (max-width: 640px) {
+    .masonry {
+      column-count: 1;
+    }
+  }
+  .masonry li {
+    break-inside: avoid;
+    margin-bottom: 36px;
+  }
+  .masonry a {
+    display: block;
+    text-decoration: none;
+  }
+  .masonry :global(img) {
+    width: 100%;
+    background: var(--surface);
+    transition: opacity 0.2s;
+  }
+  .masonry a:hover :global(img) {
+    opacity: 0.85;
+  }
+  .caption {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+  .caption .year {
+    color: var(--muted);
+  }
+  .empty {
+    color: var(--muted);
+  }
+</style>

@@ -1,0 +1,91 @@
+---
+import Base from '../layouts/Base.astro';
+import settings from '../data/settings.json';
+import { pick, ui, type Lang } from '../lib/i18n';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = ui[lang];
+const socials = ((settings.socials ?? []) as { label?: string; url?: string }[]).filter((s) => s.url);
+const intro = pick(lang, settings.contact_intro_zh, settings.contact_intro_en);
+---
+
+<Base lang={lang} title={t.contact} path="/contact/" current="contact">
+  <div class="contact">
+    <h1 class="page-title">{t.contact}</h1>
+    {intro && <p class="intro">{intro}</p>}
+
+    {
+      settings.email && (
+        <section>
+          <h2>{t.email}</h2>
+          <a class="big" href={`mailto:${settings.email}`}>
+            {settings.email}
+          </a>
+        </section>
+      )
+    }
+
+    {
+      socials.length > 0 && (
+        <section>
+          <h2>{t.social}</h2>
+          <ul>
+            {socials.map((s) => (
+              <li>
+                <a href={s.url} target="_blank" rel="noopener">
+                  {s.label || s.url}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .contact {
+    max-width: 640px;
+    padding-top: 24px;
+  }
+  .page-title {
+    margin-top: 0;
+  }
+  .intro {
+    white-space: pre-line;
+    margin: 0 0 40px;
+  }
+  section + section {
+    margin-top: 32px;
+  }
+  h2 {
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .big {
+    font-family: var(--serif);
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    text-underline-offset: 6px;
+    overflow-wrap: anywhere;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    padding: 4px 0;
+  }
+  li a {
+    text-underline-offset: 4px;
+  }
+</style>

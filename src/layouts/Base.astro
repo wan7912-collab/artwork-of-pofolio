@@ -1,0 +1,233 @@
+---
+import settings from '../data/settings.json';
+import { htmlLang, pick, ui, type Lang } from '../lib/i18n';
+import { langUrl } from '../lib/url';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  /** 本頁在另一個語言的路徑（不含 /en 前綴），例如 /about/ */
+  path: string;
+  current?: 'works' | 'about' | 'contact';
+}
+
+const { lang, title, path, current } = Astro.props;
+const t = ui[lang];
+const siteName = pick(lang, settings.site_name_zh, settings.site_name_en);
+const fullTitle = title ? `${title} — ${siteName}` : siteName;
+const otherLang: Lang = lang === 'zh' ? 'en' : 'zh';
+const nav = [
+  { key: 'works', label: t.works, href: langUrl(lang, '/') },
+  { key: 'about', label: t.about, href: langUrl(lang, '/about/') },
+  { key: 'contact', label: t.contact, href: langUrl(lang, '/contact/') },
+] as const;
+---
+
+<!doctype html>
+<html lang={htmlLang[lang]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={pick(lang, settings.description_zh, settings.description_en)} />
+    <link rel="alternate" hreflang={htmlLang[otherLang]} href={langUrl(otherLang, path)} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Noto+Serif+TC:wght@400;500&display=swap"
+    />
+    <script is:inline>
+      try {
+        const saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="site-name" href={langUrl(lang, '/')}>{siteName}</a>
+      <nav aria-label="Main">
+        {
+          nav.map((item) => (
+            <a href={item.href} aria-current={current === item.key ? 'page' : undefined}>
+              {item.label}
+            </a>
+          ))
+        }
+        <a class="lang" href={langUrl(otherLang, path)} hreflang={htmlLang[otherLang]} aria-label={t.otherLangLabel}>
+          {t.otherLang}
+        </a>
+        <button class="theme-toggle" type="button" aria-label={t.theme} title={t.theme}>
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+            <path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"></path>
+          </svg>
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <span>© {new Date().getFullYear()} {siteName}</span>
+    </footer>
+
+    <script>
+      const btn = document.querySelector('.theme-toggle');
+      btn?.addEventListener('click', () => {
+        const root = document.documentElement;
+        const isDark =
+          root.dataset.theme === 'dark' ||
+          (!root.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+        const next = isDark ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try {
+          localStorage.setItem('theme', next);
+        } catch {}
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #faf8f4;
+    --fg: #1d1b18;
+    --muted: #6f6a62;
+    --line: #e4dfd6;
+    --surface: #f1ede6;
+    --overlay: rgba(20, 18, 15, 0.94);
+    --serif: 'Cormorant Garamond', 'Noto Serif TC', 'Songti TC', serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    --gutter: clamp(16px, 4vw, 48px);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #151412;
+      --fg: #ece8e1;
+      --muted: #9a948a;
+      --line: #2c2a26;
+      --surface: #1e1c19;
+      --overlay: rgba(8, 8, 7, 0.96);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #151412;
+    --fg: #ece8e1;
+    --muted: #9a948a;
+    --line: #2c2a26;
+    --surface: #1e1c19;
+    --overlay: rgba(8, 8, 7, 0.96);
+    color-scheme: dark;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--gutter) 64px;
+  }
+  a {
+    color: inherit;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 3px;
+  }
+
+  .site-header {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 28px var(--gutter);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px 24px;
+  }
+  .site-name {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+  .site-header nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 0.95rem;
+  }
+  .site-header nav a {
+    text-decoration: none;
+    color: var(--muted);
+  }
+  .site-header nav a:hover,
+  .site-header nav a[aria-current='page'] {
+    color: var(--fg);
+  }
+  .site-header nav a[aria-current='page'] {
+    text-decoration: underline;
+    text-underline-offset: 6px;
+  }
+  .theme-toggle {
+    background: none;
+    border: 0;
+    padding: 4px;
+    color: var(--muted);
+    cursor: pointer;
+    display: inline-flex;
+  }
+  .theme-toggle:hover {
+    color: var(--fg);
+  }
+  .site-footer {
+    padding: 32px var(--gutter);
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--line);
+  }
+  .page-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin: 24px 0 32px;
+  }
+</style>
